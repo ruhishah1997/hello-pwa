@@ -1,65 +1,25 @@
 var cacheName = 'hello-pwa';
 var filesToCache = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/main.js'
+  './',
+  './index.html',
+  './css/style.css',
+  './js/main.js'
 ];
 
+/* Start the service worker and cache all of the app's content */
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(cacheName).then(function(cache) {
+      return cache.addAll(filesToCache);
+    })
+  );
+});
 
-/*  Service Worker Event Handlers */
-
-self.addEventListener( "install", function ( event ) {
-
-    console.log( "Installing the service worker!" );
-
-    self.skipWaiting();
-
-    caches.open( preCache )
-        .then( cache => {
-
-            cache.addAll( cacheList );
-
-        } );
-
-} );
-
-self.addEventListener( "activate", function ( event ) {
-
-    event.waitUntil(
-
-        caches.keys().then( cacheNames => {
-            cacheNames.forEach( value => {
-
-                if ( value.indexOf( version ) < 0 ) {
-                    caches.delete( value );
-                }
-
-            } );
-
-            console.log( "service worker activated" );
-
-            return;
-
-        } )
-
-    );
-
-} );
-
-self.addEventListener( "fetch", function ( event ) {
-
-    event.respondWith(
-
-        caches.match( event.request )
-        .then( function ( response ) {
-
-            if ( response ) {
-                return response;
-            }
-
-            return fetch( event.request );
-        } )
-    );
-
-} );
+/* Serve cached content when offline */
+self.addEventListener('fetch', function(e) {
+  e.respondWith(
+    caches.match(e.request).then(function(response) {
+      return response || fetch(e.request);
+    })
+  );
+});
